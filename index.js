@@ -124,7 +124,28 @@ app.get('/api/users/:_id/logs', async (req, res, next) => {
   }
 });
 
+// GET /api/users
+app.get('/api/users', async (req, res, next) => {
+  try {
+    const users = await User.find({}).select('username _id');
+    
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+});
 
+// Not found middleware
+app.use((req, res, next) => {
+  return next({status: 404, message: 'not found'});
+});
+
+// Error Handling middleware
+app.use((err, req, res, next) => {
+  let errCode = err.status || 500;
+  let errMessage = err.message || 'Internal Server Error';
+  res.status(errCode).type('txt').send(errMessage);
+});
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
